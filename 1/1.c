@@ -63,9 +63,8 @@ int main(int argc, char* args[]) {
     char line[6];
     // open input file
     FILE *fp = fopen("input", "r");
-    FILE *output = fopen("output", "w+");
 
-    if (!fp || !output) {
+    if (!fp) {
         printf("no file error!");
         exit(-1);
     }
@@ -100,8 +99,6 @@ int main(int argc, char* args[]) {
             }
         }
     }
-
-    fclose(output);
 
     return 0;
 
