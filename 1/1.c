@@ -14,10 +14,6 @@ uint32_t hash( uint32_t a)
     return a % 1048576;
 }
 
-typedef struct bucket {
-    uint32_t value;
-} set_bucket;
-
 typedef struct set {
     uint32_t set[1048576];
 } hashset;
@@ -80,6 +76,7 @@ int main(int argc, char* args[]) {
     }
     fclose(fp);
 
+    // loop through and find the number equal to the hash of 2020 - current number in list
     for (int i = 0; i < 199; i++) {
        int result = hashset_find(&set, 2020-list[i]);
        if (result != 0) 
@@ -88,6 +85,8 @@ int main(int argc, char* args[]) {
 
     printf("PART TWO \n\n");
     
+    // subtract a number in list from 2020 then loop the list and 
+    // return if a loop number subtracted from that first number exists
     for (int j = 0; j < 199; j++) {
         int num1 = 2020-list[j];
         for (int k = 0; k < 199; k++) {
