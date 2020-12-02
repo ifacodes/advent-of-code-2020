@@ -42,10 +42,6 @@ int hashset_find(hashset *set, int query) {
     return query;
 }
 
-int hashset_find_three(hashset *set, int query) {
-    uint32_t query_hash = hash((uint32_t) query);
-}
-
 int main(int argc, char* args[]) {
 
 
