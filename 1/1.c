@@ -70,6 +70,6 @@ int main(int argc, char *args[]) {
       }
     }
   }
-
+  hashset_free(set);
   return 0;
 }

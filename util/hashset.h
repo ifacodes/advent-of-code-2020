@@ -21,6 +21,18 @@ uint32_t hash(uint32_t a) {
 // allocate memory for the hashset
 int hashset_alloc(element **set, size_t elements) {}
 
+void hashset_free(element *set[]) {
+  for (int i = 0; i < 1024; i++) {
+    element *tmp;
+    while (set[i]) {
+      tmp = set[i];
+      set[i] = set[i]->next;
+      free(tmp);
+    }
+  }
+  free(set);
+}
+
 //
 uint32_t hashset_add(element *set[], uint32_t item) {
   // TODO - add item to linked list if hash already has a value
