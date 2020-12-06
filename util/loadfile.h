@@ -15,6 +15,6 @@ char* loadfile(char* input) {
   // allocate length + 1 to make result null terminated
   char* buffer = calloc(length + 1, sizeof(char));
   fread(buffer, sizeof(char), length, file);
-
+  
   return buffer;
 }
