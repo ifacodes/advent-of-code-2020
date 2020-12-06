@@ -11,134 +11,97 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "../util/loadfile.h"
-#include "../util/strtok_mp.h"
-
-typedef struct passport {
-  uint32_t byr;
-  uint32_t iyr;
-  uint32_t eyr;
-  char* hgt;
-  char* hcl;
-  char* ecl;
-  uint32_t pid;
-  uint32_t cid;
-} passport;
-
-typedef struct pair {
-  char* key;
-  char* value;
-} pair;
-
-uint32_t get_amount(char* data) {
-  char* tmp = data;
-  uint32_t count;
-  while ((tmp = strstr(tmp, "\n\n"))) {
-    count++;
-    tmp += 2;
-  }
-  return count;
-}
-
-void print_passport(passport* p) {
-  uint32_t byr = p->byr;
-  uint32_t iyr = p->iyr;
-  uint32_t eyr = p->eyr;
-  char* hgt = p->hgt;
-  char* hcl = p->hcl;
-  char* ecl = p->ecl;
-  uint32_t pid = p->pid;
-  uint32_t cid = p->cid;
-  printf("byr:%d\niyr:%d\neyr:%d\nhgt:%s\nhcl:%s\necl:%s\npid:%" PRIu32
-         "\ncid:%d\n\n",
-         byr, iyr, eyr, hgt, hcl, ecl, pid, cid);
-}
-
-passport* data_to_passport(char* data) {
-  passport* new = calloc(1, sizeof(passport));
-
-  pair* data_array = calloc(8, sizeof(pair));
-  int count = 0;
-  char* prop;
-  prop = strtok(data, ":\n ");
-  do {
-    data_array[count].key = prop;
-    prop = strtok(NULL, ":\n ");
-    data_array[count].value = prop;
-    prop = strtok(NULL, ":\n ");
-    count++;
-  } while (prop);
-
-  for (int i = 0; i < count; i++) {
-    if (strcmp(data_array[i].key, "byr") == 0) {
-      new->byr = atoi(data_array[i].value);
-    }
-    if (strcmp(data_array[i].key, "iyr") == 0) {
-      new->iyr = atoi(data_array[i].value);
-    }
-    if (strcmp(data_array[i].key, "eyr") == 0) {
-      new->eyr = atoi(data_array[i].value);
-    }
-    if (strcmp(data_array[i].key, "hgt") == 0) {
-      new->hgt = data_array[i].value;
-    }
-    if (strcmp(data_array[i].key, "hcl") == 0) {
-      new->hcl = data_array[i].value;
-    }
-    if (strcmp(data_array[i].key, "ecl") == 0) {
-      new->ecl = data_array[i].value;
-    }
-    if (strcmp(data_array[i].key, "pid") == 0) {
-      new->pid = (unsigned)atoi(data_array[i].value);
-    }
-    if (strcmp(data_array[i].key, "cid") == 0) {
-      new->cid = atoi(data_array[i].value);
-    }
-  }
-  // pruint32_t_passport(new);
-  free(data_array);
-  return new;
-}
-
-passport* get_passport_array(char* input, char* delimiter) {
-  uint32_t count = 0;
-  char* token;
-  char* buffer = '\0';
-  passport* array = calloc(10 * 1024, sizeof(passport));
-  token = strtok_mp(input, "\n\n", &buffer);
-
-  while (token) {
-    // pruint32_tf("%s\nBREAK\n", token);
-    array[count] = *data_to_passport(token);
-    // pruint32_tf("%s\nBREAK\n", token);
-    token = strtok_mp(NULL, "\n\n", &buffer);
-    // pruint32_tf("\n");
-    count++;
-  }
-
-  return array;
-}
 
 int main(int argc, char* args[]) {
   char* file = loadfile("input");
-  int amount = 286;
-  passport* passport_array = get_passport_array(file, "\n\n");
-  int count = 0;
-
-  for (int i = 0; i < amount; i++) {
-    print_passport(&passport_array[i]);
-    if (passport_array[i].byr && passport_array[i].eyr &&
-        passport_array[i].iyr && passport_array[i].hgt &&
-        passport_array[i].hcl && passport_array[i].ecl &&
-        passport_array[i].pid) {
-      printf("Passport #%d is valid.\n", i);
-      printf("Valid passwords = %d\n", count++);
+  char* ptr = file;
+  int passports = 0;
+  int keys = 0;
+  int length = strlen(file);
+  char buf[9];
+  while (ptr < file + length) {
+    buf[8] = 0;
+    memcpy(buf, ptr, 3);
+    if (!memcmp(buf, "byr", 3)) {
+      memcpy(buf, ptr + 4, 4);
+      buf[4] = '\0';
+      int year = atoi(buf);
+      if (year >= 1920 && year <= 2002) keys++;
+      ptr += 3;  // skip key and colon
+    }
+    if (!memcmp(buf, "iyr", 3)) {
+      memcpy(buf, ptr + 4, 4);
+      buf[4] = '\0';
+      int year = atoi(buf);
+      if (year >= 2010 && year <= 2020) keys++;
+      ptr += 3;  // skip key and colon
+    }
+    if (!memcmp(buf, "eyr", 3)) {
+      memcpy(buf, ptr + 4, 4);
+      buf[4] = '\0';
+      int year = atoi(buf);
+      if (year >= 2020 && year <= 2030) keys++;
+      ptr += 3;  // skip key and colon
+    }
+    if (!memcmp(buf, "hgt", 3)) {
+      if (*(ptr + 7) == 'c') {
+        memcpy(buf, ptr + 4, 3);
+        buf[3] = '\0';
+        int hgt = atoi(buf);
+        if (hgt >= 150 && hgt <= 193) keys++;
+      } else {
+        memcpy(buf, ptr + 4, 2);
+        int hgt = atoi(buf);
+        if (hgt >= 59 && hgt <= 76) keys++;
+      }
+      ptr += 3;  // skip key and colon
+    }
+    if (!memcmp(buf, "hcl", 3)) {
+      if (*(ptr + 4) == '#') {
+        memcpy(buf, ptr + 5, 6);
+        for (int i = 0; i < 6; ++i) {
+          if (!((buf[i] >= '0' && buf[i] <= '9') ||
+                (buf[i] >= 'a' && buf[i] <= 'f'))) {
+            break;
+          }
+        }
+        keys++;
+      }
+      ptr += 3;  // skip key and colon
+    }
+    if (!memcmp(buf, "ecl", 3)) {
+      if (!(memcmp(ptr + 4, "amb", 3)) || !(memcmp(ptr + 4, "blu", 3)) ||
+          !(memcmp(ptr + 4, "brn", 3)) || !(memcmp(ptr + 4, "gry", 3)) ||
+          !(memcmp(ptr + 4, "grn", 3)) || !(memcmp(ptr + 4, "hzl", 3)) ||
+          !(memcmp(ptr + 4, "oth", 3)))
+        keys++;
+      ptr += 3;  // skip key and colon
+    }
+    if (memcmp(buf, "pid", 3) == 0) {
+      char* pid = ptr + 4;
+      int cnt = 0;
+      while (*pid >= '0' && *pid <= '9') {
+        cnt++;
+        pid++;
+      }
+      if (cnt == 9) keys++;
+      ptr += 3;  // skip key and colon
+    }
+    while ((*ptr != ' ') && (*ptr != '\n')) {
+      ptr++;  // skip the value
+      if (!*ptr) break;
+    }
+    ptr++;  // skip the space or newline
+    if (*ptr == '\n') {
+      passports += keys == 7;
+      keys = 0;
+      ptr++;  // skip the newline
     }
   }
-  printf("%d", count);
+  printf("%d\n", passports);
 }

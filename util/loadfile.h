@@ -2,25 +2,19 @@
 #include <stdlib.h>
 
 char* loadfile(char* input) {
-  int length;
-  char* buffer;
   FILE* file = fopen(input, "r");
   if (!file) {
     printf("File could not be found");
     exit(-1);
   }
-  // get length of file
+
   fseek(file, 0L, SEEK_END);
-  length = ftell(file);
+  int length = ftell(file);
   rewind(file);
 
-  // allocate file size to buffer
-  buffer = calloc(length + 1, sizeof(char));
-
-  // read file into buffer
+  // allocate length + 1 to make result null terminated
+  char* buffer = calloc(length + 1, sizeof(char));
   fread(buffer, sizeof(char), length, file);
-
-  buffer += '\0';
 
   return buffer;
 }
