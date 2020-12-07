@@ -25,25 +25,43 @@ int main(int argc, char* args[]) {
   int16_t total = 0;
   bool prev_flag[26] = {0};
   bool curr_flag[26] = {0};
+  bool first_line = true;
   int cnt = 0;
+  int last_cnt = 0;
   while (ptr < input + length) {
     for (int i = 'a'; i <= 'z'; i++) {
-      if (*ptr == i && !(curr_flag[i - 'a'])) {
-        curr_flag[i - 97] = true;
-        break;
+      if (first_line) {
+        if (*ptr == i && !(curr_flag[i - 'a'])) {
+          curr_flag[i - 'a'] = true;
+          cnt++;
+          break;
+        }
+      } else {
+        if (*ptr == i && prev_flag[i - 'a']) {
+          curr_flag[i - 'a'] = true;
+          cnt++;
+          break;
+        }
       }
     }
-    ptr++;
-    if (*ptr == '\n' && *(ptr + 1) == '\n') {
-      total += cnt;
-      cnt = 0;
+    if (*ptr == '\n') {
+      memcpy(prev_flag, curr_flag, sizeof(curr_flag));
       memset(curr_flag, 0, sizeof(curr_flag));
+      if (first_line) first_line = false;
+      last_cnt = cnt;
+      cnt = 0;
+    }
+    if (*ptr == '\n' && *(ptr + 1) == '\n') {
+      total += last_cnt;
+      last_cnt = 0;
       memset(prev_flag, 0, sizeof(prev_flag));
+      first_line = true;
       ptr += 2;
+    } else {
+      ptr++;
     }
   }
   total += cnt;
   printf("\n%d\n", total);
-
   free(input);
 }
