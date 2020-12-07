@@ -13,14 +13,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "../util/loadfile.h"
+#include "../util/get_filesize.h"
 #include "../util/strtok_mp.h"
 
 int main(int argc, char* args[]) {
-  char* input = loadfile("input");
-  size_t length = strlen(input);
+  FILE* file = fopen("input", "r");
+  size_t length = get_filesize(file);
+  char* input = calloc(length, sizeof(char));
+  fread(input, sizeof(char), length, file);
+  fclose(file);
   char* ptr = input;
   int16_t total = 0;
   bool flag[26] = {0};
@@ -33,12 +37,13 @@ int main(int argc, char* args[]) {
         break;
       }
     }
-    ptr++;
     if (*ptr == '\n' && *(ptr + 1) == '\n') {
       total += cnt;
       cnt = 0;
       memset(flag, 0, sizeof(flag));
       ptr += 2;
+    } else {
+      ptr++;
     }
   }
   total += cnt;

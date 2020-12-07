@@ -15,16 +15,24 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#include "../util/loadfile.h"
+#include "../util/get_filesize.h"
 
 int main(int argc, char* args[]) {
-  char* file = loadfile("input");
-  char* ptr = file;
+  FILE* file = fopen("input", "r");
+  size_t length = get_filesize(file);
+  char* input = calloc(length, sizeof(char));
+  fread(input, sizeof(char), length, file);
+  fclose(file);
+  char* ptr = input;
   int passports = 0;
   int keys = 0;
-  int length = strlen(file);
   char buf[9];
-  while (ptr < file + length) {
+  while (ptr < input + length) {
+    if (*ptr == '\n') {
+      passports += keys == 7;
+      keys = 0;
+      ptr++;  // skip the newline
+    }
     buf[8] = 0;
     memcpy(buf, ptr, 3);
     if (!memcmp(buf, "byr", 3)) {
@@ -96,12 +104,8 @@ int main(int argc, char* args[]) {
       ptr++;  // skip the value
       if (!*ptr) break;
     }
-    ptr++;  // skip the space or newline
-    if (*ptr == '\n') {
-      passports += keys == 7;
-      keys = 0;
-      ptr++;  // skip the newline
-    }
+    ptr++;
   }
   printf("%d\n", passports);
+  free(input);
 }

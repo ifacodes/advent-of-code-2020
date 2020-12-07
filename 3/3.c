@@ -58,7 +58,7 @@ int main(int argc, char *args[]) {
   p2c = check_collisions(7, 1, length, buffer);
   p2d = check_collisions(1, 2, length, buffer);
 
-  printf("%d\n%d\n%d\n%d\n%d\n%ld", p2a, part1, p2b, p2c, p2d,
+  printf("%d\n%d\n%d\n%d\n%d\n%ld\n", p2a, part1, p2b, p2c, p2d,
          part1 * (long)(p2a * (long)(p2b * (long)(p2c * p2d))));
 
   free(buffer);

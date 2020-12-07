@@ -14,11 +14,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <inttypes.h>
 #include <string.h>
 
-#include "../util/loadfile.h"
+#include "../util/get_filesize.h"
 
 int main(int argc, char* args[]) {
-  char* input = loadfile("input");
-  size_t length = strlen(input);
+  FILE* file = fopen("input", "r");
+  size_t length = get_filesize(file);
+  char* input = calloc(length, sizeof(char));
+  fread(input, sizeof(char), length, file);
+  fclose(file);
   char* ptr = input;
   int8_t row = 0;
   int8_t col = 0;
@@ -68,7 +71,10 @@ int main(int argc, char* args[]) {
     }
   }
   for (int k = 0; k < 960; k++) {
-    if (array[k + 1] != array[k] + 1 && array[k] != 998)
-      printf("my seat id is: %d\n", array[k] + 1);
+    if (array[k] != 998) {
+      if (array[k + 1] != array[k] + 1)
+        printf("my seat id is: %d\n", array[k] + 1);
+    }
   }
+  free(input);
 }
