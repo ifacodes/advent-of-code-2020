@@ -16,7 +16,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string.h>
 
 #include "../util/loadfile.h"
-#include "../util/strtok_mp.h"
 
 int main(int argc, char* args[]) {
   char* input = loadfile("input");
