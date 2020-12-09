@@ -1,6 +1,6 @@
 /*
 === Advent of Code - 2020 ===
-        === Day 7 ===
+        === Day 7a ===
     by Aoife Bradley
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -13,20 +13,45 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <inttypes.h>
 #include <nmmintrin.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "../util/get_filesize.h"
-#include "../util/hashset.h"
 
 typedef struct {
-  int amount;
-  char* bag_type;
-} pair;
+  char* bag;
+  uint32_t contains[8];
+} bag;
 
-// for each line, if the bag isn't in the table, add it.
-// for each contained bag, if it isn't in the table add it
-// then tell outer bag it contains that bag, and the inner bag it is
-// contained by the outer bag
+bag bags[65536] = {0};
+
+uint32_t hasher(char* string) {
+  uint32_t crc = 0L;
+  for (int i = 0; string[i] != 0; i++) {
+    crc = _mm_crc32_u8(crc, string[i]);
+  }
+  return crc % 65536;
+}
+
+bool bagchk(uint32_t hash) {
+  printf("%s -> ", bags[hash].bag);
+  bool result = 0;
+  if (!strncmp(bags[hash].bag, "shiny gold", 11)) {
+    printf("Found Gold!\n");
+    return true;
+  }
+  // this checks 1, 3, 5, 7 of the 'contains' array, the hash locations
+  for (int i = 1; i <= 7; i += 2) {
+    int next_hash = bags[hash].contains[i];
+    if (next_hash) result = bagchk(next_hash);
+    if (result) {
+      printf("Found Gold!\n");
+      return true;
+    }
+  }
+  printf("No More!\n");
+  return result;
+}
 
 int main(int argc, char* args[]) {
   FILE* file = fopen("input", "r");
@@ -35,20 +60,60 @@ int main(int argc, char* args[]) {
   fread(input, sizeof(char), length, file);
   fclose(file);
   char* ptr = input;
+
   while (ptr < input + length) {
-    uint32_t crc = 0L;
-    char* pos = strstr(ptr, "bags contain");
-    if (pos) {
-      while (ptr + 1 != pos) {
-        crc = _mm_crc32_u8(crc, *ptr);
+    char* pos = strstr(ptr, " bags contain");
+    if (!pos) continue;
+    bag new_bag;
+    memset(new_bag.contains, 0, sizeof(new_bag.contains));
+    int bag_array_index = 0;
+    size_t loc = pos - ptr;
+    new_bag.bag = calloc(loc + 1, sizeof(char));
+    strncpy(new_bag.bag, ptr, loc);
+    uint32_t hash = hasher(new_bag.bag);
+    bags[hash] = new_bag;
+    ptr += loc + 14;
+    if (*ptr == 'n') {
+      while (ptr < input + length && *ptr != '\n') ptr += 2;
+      if (ptr < input + length && *ptr == '\n') ptr++;
+      continue;
+    }
+    while (ptr < input + length && *ptr != '\n') {
+      bags[hash].contains[bag_array_index] = atoi(ptr);
+      bag_array_index++;
+      ptr += 2;
+      pos = ptr;
+      while (!(*pos == ',' || *pos == '.')) ++pos;
+      loc = pos - 4 - ptr;
+      if (ptr[loc] == 'b') loc--;
+      char* tmp = calloc(loc + 1, sizeof(char));
+      strncpy(tmp, ptr, loc);
+      bags[hash].contains[bag_array_index] = hasher(tmp);
+      free(tmp);
+      bag_array_index++;
+      ptr = pos;
+      if (ptr + 2 < input + length && *ptr == '.') {
         ptr++;
-      }
-      printf("%" PRIu32 "\n", crc);
-      while (ptr < input + length && *ptr != '\n') {
-        ptr++;
+      } else {
+        ptr += 2;
       }
     }
     ptr++;
   }
+  int cnt = 0;
+  int forcnt = 0;
+  for (int i = 0; i < 65536; i++) {
+    if (forcnt == 594) {
+      break;
+    }
+    if (bags[i].bag) {
+      forcnt++;
+      if (bagchk(i)) cnt++;
+    }
+  }
+  for (int i = 0; i < 65536; i++) {
+    free(bags[i].bag);
+  }
+  printf("%d\n", cnt - 1);
   free(input);
 }

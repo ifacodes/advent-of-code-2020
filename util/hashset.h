@@ -19,8 +19,6 @@ uint32_t hash(uint32_t a) {
   return a % 1024;
 }
 
-uint32_t crc32_hash(char *string) { uint32_t crc = 0L; }
-
 void hashset_free(element *set[]) {
   for (int i = 0; i < 1024; i++) {
     element *tmp;
@@ -61,8 +59,6 @@ uint32_t hashset_add(element *set[], uint32_t item) {
 
   return 0;
 }
-
-uint32_t hashtable_add(element *set[], uint32_t key, int value) { if () }
 
 int hashset_find(element *set[], uint32_t query) {
   uint32_t query_hash = hash(query);
