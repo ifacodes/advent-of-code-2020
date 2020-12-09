@@ -1,6 +1,6 @@
 /*
 === Advent of Code - 2020 ===
-        === Day 7a ===
+        === Day 7 ===
     by Aoife Bradley
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -34,10 +34,10 @@ uint32_t hasher(char* string) {
 }
 
 bool bagchk(uint32_t hash) {
-  printf("%s -> ", bags[hash].bag);
+  // printf("%s -> ", bags[hash].bag);
   bool result = 0;
   if (!strncmp(bags[hash].bag, "shiny gold", 11)) {
-    printf("Found Gold!\n");
+    // printf("Found Gold!\n");
     return true;
   }
   // this checks 1, 3, 5, 7 of the 'contains' array, the hash locations
@@ -45,12 +45,39 @@ bool bagchk(uint32_t hash) {
     int next_hash = bags[hash].contains[i];
     if (next_hash) result = bagchk(next_hash);
     if (result) {
-      printf("Found Gold!\n");
+      // printf("Found Gold!\n");
       return true;
     }
   }
-  printf("No More!\n");
+  // printf("No More!\n");
   return result;
+}
+
+int part2(uint32_t hash) {
+  int cnt = 1;
+  if (bags[hash].contains[0]) {
+    for (int i = 0; i <= 6; i += 2) {
+      uint32_t next_hash = bags[hash].contains[i + 1];
+      if (next_hash) cnt += bags[hash].contains[i] * part2(next_hash);
+    }
+  }
+
+  return cnt;
+}
+
+int part1() {
+  int cnt = 0;
+  int forcnt = 0;
+  for (int i = 0; i < 65536; i++) {
+    if (forcnt == 594) {
+      break;
+    }
+    if (bags[i].bag) {
+      forcnt++;
+      if (bagchk(i)) cnt++;
+    }
+  }
+  return cnt - 1;
 }
 
 int main(int argc, char* args[]) {
@@ -60,7 +87,7 @@ int main(int argc, char* args[]) {
   fread(input, sizeof(char), length, file);
   fclose(file);
   char* ptr = input;
-
+  uint32_t shiny_hash = 0L;
   while (ptr < input + length) {
     char* pos = strstr(ptr, " bags contain");
     if (!pos) continue;
@@ -71,6 +98,7 @@ int main(int argc, char* args[]) {
     new_bag.bag = calloc(loc + 1, sizeof(char));
     strncpy(new_bag.bag, ptr, loc);
     uint32_t hash = hasher(new_bag.bag);
+    if (!strncmp(new_bag.bag, "shiny gold", 11)) shiny_hash = hash;
     bags[hash] = new_bag;
     ptr += loc + 14;
     if (*ptr == 'n') {
@@ -100,20 +128,10 @@ int main(int argc, char* args[]) {
     }
     ptr++;
   }
-  int cnt = 0;
-  int forcnt = 0;
-  for (int i = 0; i < 65536; i++) {
-    if (forcnt == 594) {
-      break;
-    }
-    if (bags[i].bag) {
-      forcnt++;
-      if (bagchk(i)) cnt++;
-    }
-  }
+  printf("Part 1: %d\n", part1());
+  printf("Part 2: %d\n", part2(shiny_hash) - 1);
   for (int i = 0; i < 65536; i++) {
     free(bags[i].bag);
   }
-  printf("%d\n", cnt - 1);
   free(input);
 }
