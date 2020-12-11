@@ -1,6 +1,6 @@
 /*
 === Advent of Code - 2020 ===
-        === Day 8 ===
+        === Day 8a ===
       by Aoife Bradley
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
