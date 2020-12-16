@@ -1,6 +1,6 @@
 /*
 === Advent of Code - 2020 ===
-        === Day 8b ===
+        === Day 8a ===
       by Aoife Bradley
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -16,54 +16,83 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-char** instructions = 0;
-bool visited[1000] = {0};
-char* swap_tmp = 0;
-int size = 0;
-int acc = 0;
-int line = 0;
-int last_save_line[1000] = {0};
-int cnt = 0;
+bool execute(char** program, int line_amount, int32_t* final_acc) {
+  bool visited[1000] = {0};
+  uint32_t line = 0;
+  while (!visited[line] && line < line_amount) {
+    char* op = calloc(4, sizeof(char));
+    strncpy(op, program[line], 3);
+    char sign = program[line][4];
+    int step = atoi(program[line] + 5);
+    visited[line] = true;
+    printf("operation: %s, sign: %c, step: %d\n", op, sign, step);
 
-void execute() {
-  if (visited[line]) {
-    line = 0;
-    
-    };
-  visited[line] = true;
-  char* op = calloc(4, sizeof(char));
-  strncpy(op, instructions[line], 3);
-  char sign = instructions[line][4];
-  int step = atoi(instructions[line] + 5);
-  printf("operation: %s, sign: %c, step: %d\n", op, sign, step);
+    if (!memcmp(op, "acc", 3)) {
+      if (sign == '+') {
+        *final_acc += step;
+      } else {
+        *final_acc -= step;
+      }
+      line++;
+    }
+    if (!memcmp(op, "jmp", 3)) {
+      if (sign == '+') {
+        line += step;
+      } else {
+        line -= step;
+      }
+    }
+    if (!memcmp(op, "nop", 3)) {
+      line++;
+    }
+    free(op);
+  }
+  return line >= line_amount ? true : false;
+}
 
-  if (!memcmp(op, "acc", 3)) {
-    if (sign == '+') {
-      acc += step;
-    } else {
-      acc -= step;
+int part2(char** program, int line_amount) {
+  char** this_program = calloc(line_amount, sizeof(char*));
+  for (int k = 0; k < line_amount; ++k) {
+    this_program[k] = calloc(9, sizeof(char));
+    memcpy(this_program[k], program[k], 9 * sizeof(char));
+  }
+
+  for (int i = 0; i < line_amount; ++i) {
+    int result = 0;
+    char new_cmd[10] = {0};
+    if (!memcmp(program[i], "jmp", 3)) {
+      sprintf(new_cmd, "nop%s", program[i] + 3);
+    } else if (!memcmp(program[i], "nop", 3)) {
+      sprintf(new_cmd, "jmp%s", program[i] + 3);
+    }
+    if (new_cmd[0]) {
+      strncpy(this_program[i], new_cmd, 9);
+      printf("new line: %s\n", this_program[i]);
+      if (execute(this_program, line_amount, &result)) {
+        for (int j = 0; j < line_amount; ++j) {
+          free(this_program[j]);
+        }
+        free(this_program);
+        return result;
+      } else {
+        strcpy(this_program[i], program[i]);
+        printf("%s\n", this_program[i]);
+      }
     }
   }
-  if (memcmp(op, "jmp", 3)) {
-    line++;
-  } else {
-    if (sign == '+') {
-      line += step;
-    } else {
-      line -= step;
-    }
-  }
-  free(op);
-  execute();
+  return 0;
 }
 
 int main(int argc, char* args[]) {
   FILE* file = fopen("input", "r");
+  char** instructions = 0;
+  int32_t acc = 0;
+  int i_amount = 0;
+  char buf[10] = {0};
   instructions = calloc(1, sizeof(char*));
   // each line is max 8 char + null terminator
   instructions[0] = calloc(9, sizeof(char));
-  char buf[10] = {0};
-  int i_amount = 0;
+
   while (fgets(buf, sizeof(buf), file)) {
     buf[strcspn(buf, "\n")] = 0;
     strncpy(instructions[i_amount], buf, 9);
@@ -73,10 +102,8 @@ int main(int argc, char* args[]) {
     memset(buf, 0, 9);
   }
   fclose(file);
-  size = i_amount;
-  printf("%d\n", i_amount);
-  execute();
-  printf("%d\n", acc);
+  execute(instructions, i_amount, &acc);
+  printf("part1: %d\npart2: %d\n", acc, part2(instructions, i_amount));
   for (int i = 0; i <= i_amount; i++) free(instructions[i]);
   free(instructions);
 }
