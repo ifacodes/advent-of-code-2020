@@ -52,6 +52,7 @@ void execute() {
 
 int main(int argc, char* args[]) {
   FILE* file = fopen("input", "r");
+  if (!file) return 0;
   instructions = calloc(1, sizeof(char*));
   // each line is max 8 char + null terminator
   instructions[0] = calloc(9, sizeof(char));

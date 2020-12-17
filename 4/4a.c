@@ -20,6 +20,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 int main(int argc, char* args[]) {
   FILE* file = fopen("input", "r");
+  if (!file) return 0;
   size_t length = get_filesize(file);
   char* input = calloc(length, sizeof(char));
   fread(input, sizeof(char), length, file);

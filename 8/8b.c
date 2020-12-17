@@ -85,6 +85,7 @@ int part2(char** program, int line_amount) {
 
 int main(int argc, char* args[]) {
   FILE* file = fopen("input", "r");
+  if (!file) return 0;
   char** instructions = 0;
   int32_t acc = 0;
   int i_amount = 0;
