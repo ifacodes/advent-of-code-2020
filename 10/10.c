@@ -15,8 +15,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#define OUTLET_RATING 0
-
 void part1(int list[], int length) {
   int onejoltcnt = 0;
   int threejoltcnt = 0;
