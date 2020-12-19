@@ -17,29 +17,28 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 void part1(int list[], int length) {
   int onejoltcnt = 0;
-  int threejoltcnt = 0;
+  int threejoltcnt = 1;  // starts at 1 to account for the 3 jolt diff between
+                         // final adapter and phone
   int cur_cmp = 0;
 
   for (int i = 0; i < length; ++i) {
-    if (list[i] - cur_cmp == 1)
-      printf("previous: %d, current: %d, new 1 jolt diff: %d\n", cur_cmp,
-             list[i], ++onejoltcnt);
-    if (list[i] - cur_cmp == 3)
-      printf("previous: %d, current: %d, new 3 jolt diff: %d\n", cur_cmp,
-             list[i], ++threejoltcnt);
+    if (list[i] - cur_cmp == 1) {
+      ++onejoltcnt;
+    } else {
+      ++threejoltcnt;
+    }
     cur_cmp = list[i];
   }
 
   printf(
       "1 Jolt Difference Amount: %d, 3 Jolt Difference Amount: %d, Multipled: "
       "%d\n",
-      onejoltcnt, threejoltcnt, onejoltcnt * ++threejoltcnt);
+      onejoltcnt, threejoltcnt, onejoltcnt * threejoltcnt);
 }
 
 int main(int argc, char *args[]) {
   FILE *file = fopen("input", "r");
   if (!file) return 1;
-
   int list_length = 1;
   int *ratings_list = calloc(list_length, sizeof(int));
 
